@@ -8,7 +8,7 @@
 
 #import "TLCircleProgressView.h"
 
-#define TL_BACKGROUND_WIDTH 20
+#define TL_BACKGROUND_WIDTH 30
 #define TL_LINE_WIDTH 20
 #define TL_SLIDER_SIZE 150
 #define TL_BLUR_VALUE 0
@@ -20,7 +20,7 @@
 #define radiansToDegrees( radians ) ( ( radians ) * ( 180.0 / M_PI ) )
 
 /** Parameters **/
-#define TB_SAFEAREA_PADDING 20
+#define TB_SAFEAREA_PADDING TL_BACKGROUND_WIDTH
 
 
 
@@ -34,31 +34,57 @@
 
 @implementation TLCircleProgressView
 
+/** Invoked by NIB */
+- (void)awakeFromNib
+{
+    [super awakeFromNib];
+    [self setup];
+}
+
+
+/** Invoked by code */
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
-        self.radius = self.frame.size.width/2 - TB_SAFEAREA_PADDING;
-        self.angle = 0;
-        
-        self.progressColor = [UIColor colorWithRed:10/255.0 green:10/255.0 blue:10/255.0 alpha:0.25];
-        self.trackColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1.0];
-        self.backgroundColor = [UIColor clearColor];
-        
-        // UIKit
-        self.lblProgress = [[UILabel alloc] initWithFrame:CGRectMake(0,
-                                                                     0,
-                                                                     CGRectGetWidth(frame),
-                                                                     CGRectGetHeight(frame))];
-        self.lblProgress.textColor = self.trackColor;
-        self.lblProgress.textAlignment = NSTextAlignmentCenter;
-        self.lblProgress.font = [UIFont systemFontOfSize:30.0];
-        self.lblProgress.center = CGPointMake(CGRectGetWidth(frame)/2,CGRectGetHeight(frame)/2);
-        
-        [self addSubview:self.lblProgress];
+        [self setup];
     }
     return self;
+}
+
+
+/** Invoked by Storyboard */
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        [self setup];
+    }
+    return self;
+}
+
+
+- (void)setup
+{
+    // Initialization code
+    self.radius = self.frame.size.width/2 - TB_SAFEAREA_PADDING;
+    self.angle = 0;
+    
+    self.progressColor = [UIColor colorWithRed:10/255.0 green:10/255.0 blue:10/255.0 alpha:0.25];
+    self.trackColor = [UIColor colorWithRed:255/255.0 green:255/255.0 blue:255/255.0 alpha:1.0];
+    self.backgroundColor = [UIColor clearColor];
+    
+    // UIKit
+    self.lblProgress = [[UILabel alloc] initWithFrame:CGRectMake(0,
+                                                                 0,
+                                                                 CGRectGetWidth(self.frame),
+                                                                 CGRectGetHeight(self.frame))];
+    self.lblProgress.textColor = self.trackColor;
+    self.lblProgress.textAlignment = NSTextAlignmentCenter;
+    self.lblProgress.font = [UIFont systemFontOfSize:30.0];
+    self.lblProgress.center = CGPointMake(CGRectGetWidth(self.frame)/2,CGRectGetHeight(self.frame)/2);
+    
+    [self addSubview:self.lblProgress];
 }
 
 
@@ -99,6 +125,9 @@
     CGContextSetLineWidth(context, TL_LINE_WIDTH);
     CGContextSetLineCap(context, kCGLineCapRound);
     
+    //Use shadow to create the Blur effect
+    CGContextSetShadowWithColor(context, CGSizeMake(0, 0), self.angle/20, self.trackColor.CGColor);
+    
     //draw it!
     CGContextDrawPath(context, kCGPathStroke);
     
@@ -110,13 +139,13 @@
     
     //Draw the outside light
     CGContextBeginPath(context);
-    CGContextAddArc(context, self.frame.size.width/2  , self.frame.size.height/2, self.radius+TL_BACKGROUND_WIDTH/2, 0, degreesToRadians(-self.angle), 1);
+    CGContextAddArc(context, self.frame.size.width/2  , self.frame.size.height/2, self.radius+TL_BACKGROUND_WIDTH/2, 0, degreesToRadians(self.angle), 0);
     [[UIColor colorWithWhite:1.0 alpha:0.05]set];
     CGContextDrawPath(context, kCGPathStroke);
     
     //draw the inner light
     CGContextBeginPath(context);
-    CGContextAddArc(context, self.frame.size.width/2  , self.frame.size.height/2, self.radius-TL_BACKGROUND_WIDTH/2, 0, degreesToRadians(-self.angle), 1);
+    CGContextAddArc(context, self.frame.size.width/2  , self.frame.size.height/2, self.radius-TL_BACKGROUND_WIDTH/2, 0, degreesToRadians(self.angle), 0);
     [[UIColor colorWithWhite:1.0 alpha:0.05]set];
     CGContextDrawPath(context, kCGPathStroke);
     

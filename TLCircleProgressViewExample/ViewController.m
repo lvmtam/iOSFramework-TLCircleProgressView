@@ -10,39 +10,40 @@
 
 #import "TLCircleProgressView.h"
 
-@interface ViewController ()
+#define TIME_INTERVAL 0.025
+#define FPS 60.0
 
+@interface ViewController ()
+@property (weak, nonatomic) IBOutlet TLCircleProgressView *progressView;
+@property (weak, nonatomic) IBOutlet UIProgressView *progressViewDefault;
 @end
 
-@implementation ViewController {
-    TLCircleProgressView *progressView;
-}
+@implementation ViewController
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    progressView = [[TLCircleProgressView alloc] initWithFrame:CGRectMake(50, 50, 150, 150)];
-    
-    [NSTimer scheduledTimerWithTimeInterval:0.025
+    [NSTimer scheduledTimerWithTimeInterval:TIME_INTERVAL
                                      target:self
                                    selector:@selector(increaseProgress)
                                    userInfo:nil
                                     repeats:YES];
-    
-    [self.view addSubview:progressView];
 }
 
 - (void)increaseProgress
 {
-    CGFloat nextProgress = progressView.progress + 0.002;
+    //CGFloat nextProgress = self.progressView.progress + 0.002;
+    
+    CGFloat nextProgress = (self.progressView.progress + (2.0f/FPS)*TIME_INTERVAL);
     
     if (nextProgress > 1) {
         nextProgress = 0;
     }
     
-    [progressView setProgress:nextProgress animated:NO];
+    [self.progressView setProgress:nextProgress animated:NO];
+    [self.progressViewDefault setProgress:nextProgress animated:YES];
 }
 
 - (void)didReceiveMemoryWarning
